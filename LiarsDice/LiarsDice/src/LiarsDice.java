@@ -26,7 +26,7 @@ public class LiarsDice {
     private static void createAndShowGUI() {
         JFrame frame = new JFrame("Liar's Dice Simulator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 700);
+        frame.setSize(800, 600);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -45,7 +45,7 @@ public class LiarsDice {
         JLabel rollsLabel = new JLabel("Enter number of rolls:");
         rollsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JTextField rollsInput = new JTextField("10000", 10);
+        JTextField rollsInput = new JTextField("1000000", 10);
         rollsInput.setMaximumSize(new Dimension(200, 30));
 
         // Panel for dice
@@ -76,7 +76,10 @@ public class LiarsDice {
 
         // Panel for all selection areas in a row
         JPanel selectionPanel = new JPanel();
-        selectionPanel.setLayout(new GridLayout(1, 3));
+        selectionPanel.setLayout(new GridLayout(1, 4));
+
+        // Normal Failure Criteria
+        JPanel failurePanel = createCriteriaPanel("Normal Failure Criteria");
 
         // Partial Success Criteria
         JPanel partialPanel = createCriteriaPanel("Partial Success Criteria");
@@ -88,6 +91,7 @@ public class LiarsDice {
         JPanel criticalPanel = createCriteriaPanel("Critical Criteria");
 
         // Add all criteria panels to the selection panel
+        selectionPanel.add(failurePanel);
         selectionPanel.add(partialPanel);
         selectionPanel.add(fullPanel);
         selectionPanel.add(criticalPanel);
@@ -103,15 +107,15 @@ public class LiarsDice {
         //Add input panels together
         enteringValuesPanel.add(entireRolls);
         enteringValuesPanel.add(entireDice);
-
+        
         List<SwingWorker<String, Void>> currentWorker = new ArrayList<>(1);
 
         simulateButton.addActionListener(e -> {
             try {
                 int totalRolls = Integer.parseInt(rollsInput.getText());
                 int numDice = Integer.parseInt(diceInput.getText());
-                if (numDice <= 0) {
-                    JOptionPane.showMessageDialog(frame, "Number of dice must be greater than 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                if (numDice <= 0 || totalRolls <= 0) {
+                    JOptionPane.showMessageDialog(frame, "Number of dice and rolls must be greater than 0.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 progressBar.setValue(0);
@@ -122,6 +126,7 @@ public class LiarsDice {
                 List<String> partialCriteria = getSelectedCriteria(partialPanel);
                 List<String> fullCriteria = getSelectedCriteria(fullPanel);
                 List<String> critCriteria = getSelectedCriteria(criticalPanel);
+                List<String> failureCriteria = getSelectedCriteria(failurePanel);
 
                 SwingWorker<String, Void> worker = new DiceSimulationWorker(
                     numDice,
@@ -130,6 +135,7 @@ public class LiarsDice {
                     partialCriteria,
                     fullCriteria,
                     critCriteria,
+                    failureCriteria,
                     resultsArea,
                     simulateButton,
                     cancelButton,

@@ -16,7 +16,7 @@ public class DiceUtils {
         return rolls;
     }
 
-    public static String analyzeRolls(int[] rolls, List<String> partialCriteria, List<String> fullCriteria, List<String> critCriteria) {
+    public static String analyzeRolls(int[] rolls, List<String> partialCriteria, List<String> fullCriteria, List<String> critCriteria, List<String> failureCriteria) {
         Map<Integer, Integer> counts = new HashMap<>();
         for (int roll : rolls) {
             counts.put(roll, counts.getOrDefault(roll, 0) + 1);
@@ -37,21 +37,37 @@ public class DiceUtils {
         if (matchesCriteria(critCriteria, pairs, threeOfAKind, fourOfAKind, fiveOfAKind, fullHouse, straight)) return "Crit";
         if (matchesCriteria(fullCriteria, pairs, threeOfAKind, fourOfAKind, fiveOfAKind, fullHouse, straight)) return "Full Success";
         if (matchesCriteria(partialCriteria, pairs, threeOfAKind, fourOfAKind, fiveOfAKind, fullHouse, straight)) return "Partial Success";
+        if (matchesCriteria(failureCriteria, pairs, threeOfAKind, fourOfAKind, fiveOfAKind, fullHouse, straight)) return "Normal Failure";
 
-        return "Failure";
+        return "Critical Failure";
     }
 
     private static boolean matchesCriteria(List<String> criteria, int pairs, int threeOfAKind, int fourOfAKind, int fiveOfAKind, boolean fullHouse, boolean straight) {
         for (String criterion : criteria) {
             switch (criterion) {
-                case "Pair": { if (pairs > 0) return true; }
-                case "Two Pair": { if (pairs >= 2) return true; }
-                case "Three of a Kind": { if (threeOfAKind > 0) return true; }
-                case "Four of a Kind": { if (fourOfAKind > 0) return true; }
-                case "Full House": { if (fullHouse) return true; }
-                case "Straight": { if (straight) return true; }
-                case "Five of a Kind": { if (fiveOfAKind > 0) return true; }
+                case "Pair":
+                    if (pairs > 0) return true;
+                    break;
+                case "Two Pair":
+                    if (pairs >= 2) return true;
+                    break;
+                case "Three of a Kind":
+                    if (threeOfAKind > 0) return true;
+                    break;
+                case "Four of a Kind":
+                    if (fourOfAKind > 0) return true;
+                    break;
+                case "Full House":
+                    if (fullHouse) return true;
+                    break;
+                case "Straight":
+                    if (straight) return true;
+                    break;
+                case "Five of a Kind":
+                    if (fiveOfAKind > 0) return true;
+                    break;
             }
+            
         }
         return false;
     }

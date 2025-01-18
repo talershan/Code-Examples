@@ -10,6 +10,7 @@ public class DiceSimulationWorker extends SwingWorker<String, Void> {
     private final List<String> partialCriteria;
     private final List<String> fullCriteria;
     private final List<String> critCriteria;
+    private final List<String> failureCriteria;
     private final JTextArea resultsArea;
     private final JButton simulateButton;
     private final JButton cancelButton;
@@ -31,6 +32,7 @@ public class DiceSimulationWorker extends SwingWorker<String, Void> {
             List<String> partialCriteria,
             List<String> fullCriteria,
             List<String> critCriteria,
+            List<String> failureCriteria,
             JTextArea resultsArea,
             JButton simulateButton,
             JButton cancelButton,
@@ -42,6 +44,7 @@ public class DiceSimulationWorker extends SwingWorker<String, Void> {
         this.partialCriteria = partialCriteria;
         this.fullCriteria = fullCriteria;
         this.critCriteria = critCriteria;
+        this.failureCriteria = failureCriteria;
         this.resultsArea = resultsArea;
         this.simulateButton = simulateButton;
         this.cancelButton = cancelButton;
@@ -50,7 +53,7 @@ public class DiceSimulationWorker extends SwingWorker<String, Void> {
 
     @Override
     protected String doInBackground() throws Exception {
-        return DiceSimulator.runSimulation(numberOfDice, totalRolls, progressBar, partialCriteria, fullCriteria, critCriteria);
+        return DiceSimulator.runSimulation(numberOfDice, totalRolls, progressBar, partialCriteria, fullCriteria, critCriteria, failureCriteria);
     }
 
     @Override
@@ -58,6 +61,7 @@ public class DiceSimulationWorker extends SwingWorker<String, Void> {
         try {
             resultsArea.setText(get());
         } catch (Exception e) {
+            e.printStackTrace();
             resultsArea.setText("Error occurred during simulation.");
         } finally {
             progressLabel.setText("");
