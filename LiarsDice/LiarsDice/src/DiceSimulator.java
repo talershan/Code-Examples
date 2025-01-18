@@ -2,13 +2,13 @@ package src;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import javax.swing.JProgressBar;
 
-class DiceSimulator {
+public class DiceSimulator {
 
-    public static String runSimulation(int totalRolls, JProgressBar progressBar) {
+    public static String runSimulation(int numberOfDice, int totalRolls, JProgressBar progressBar, List<String> partialCriteria, List<String> fullCriteria, List<String> critCriteria) {
         Map<String, Integer> rollCounts = new HashMap<>();
         rollCounts.put("Partial Success", 0);
         rollCounts.put("Full Success", 0);
@@ -20,20 +20,20 @@ class DiceSimulator {
                 return "Simulation was canceled.";
             }
 
-            int[] diceRolls = DiceUtils.rollDice(5);
-            String result = DiceUtils.analyzeRolls(diceRolls);
+            int[] diceRolls = DiceUtils.rollDice(numberOfDice);
+            String result = DiceUtils.analyzeRolls(diceRolls, partialCriteria, fullCriteria, critCriteria);
             rollCounts.put(result, rollCounts.get(result) + 1);
 
             if (i % (totalRolls / 100) == 0) {
-                int progress = (int) ((i / (double) totalRolls) * 100);
-                progressBar.setValue(progress);
+                progressBar.setValue((int) ((i / (double) totalRolls) * 100));
             }
         }
 
         progressBar.setValue(100);
 
         NumberFormat numberFormat = NumberFormat.getInstance();
-        StringBuilder results = new StringBuilder("Results after " + numberFormat.format(totalRolls) + " rolls:\n\n");
+        StringBuilder results = new StringBuilder("Results after " + numberFormat.format(totalRolls) + " rolls:\n"
+         + numberOfDice + " dice rolling\n\n");
 
         for (Map.Entry<String, Integer> entry : rollCounts.entrySet()) {
             double percentage = (entry.getValue() * 100.0) / totalRolls;

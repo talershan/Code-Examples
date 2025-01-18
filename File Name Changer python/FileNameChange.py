@@ -14,9 +14,6 @@ class FileRenamerApp:
         style = ttk.Style()
         style.theme_use("clam")  # Choose a modern theme
         
-        # Customize progress bar color to blue
-        style.configure("blue.Horizontal.TProgressbar", troughcolor="white", background="#0078D7", thickness=10)
-        
         # Frame for folder selection
         folder_frame = ttk.Frame(root, padding=(5, 5, 5, 5))
         folder_frame.pack(fill="x")
@@ -33,10 +30,15 @@ class FileRenamerApp:
         ttk.Label(action_frame, text="Season:").grid(row=0, column=0, sticky="e")
         self.season_entry = ttk.Entry(action_frame, width=5)
         self.season_entry.grid(row=0, column=1, padx=5)
-        self.season_entry.bind("<Return>", lambda event: self.preview_renames())
+        self.season_entry.bind("<Return>", lambda event: self.start_episode_entry.focus())
         
-        ttk.Button(action_frame, text="Preview", command=self.preview_renames).grid(row=0, column=2, padx=5)
-        ttk.Button(action_frame, text="Apply", command=self.apply_changes).grid(row=0, column=3, padx=5)
+        ttk.Label(action_frame, text="Starting Episode:").grid(row=0, column=2, sticky="e")
+        self.start_episode_entry = ttk.Entry(action_frame, width=5)
+        self.start_episode_entry.grid(row=0, column=3, padx=5)
+        self.start_episode_entry.bind("<Return>", lambda event: self.preview_renames())
+        
+        ttk.Button(action_frame, text="Preview", command=self.preview_renames).grid(row=0, column=4, padx=5)
+        ttk.Button(action_frame, text="Apply", command=self.apply_changes).grid(row=0, column=5, padx=5)
         
         # Treeview for preview
         self.tree = ttk.Treeview(root, columns=("Old Name", "New Name"), show="headings", height=10)
@@ -46,8 +48,8 @@ class FileRenamerApp:
         self.tree.column("New Name", anchor="w", width=250)
         self.tree.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Progress bar with custom blue style
-        self.progress = ttk.Progressbar(root, orient="horizontal", length=100, mode="determinate", style="blue.Horizontal.TProgressbar")
+        # Progress bar
+        self.progress = ttk.Progressbar(root, orient="horizontal", length=100, mode="determinate")
         self.progress.pack(fill="x", padx=10, pady=5)
         
         # Status bar
@@ -90,13 +92,15 @@ class FileRenamerApp:
         if not self.folder_path:
             self.status_label.config(text="Error: No folder selected")
             return
+        
         try:
             new_season = int(self.season_entry.get())
+            start_episode = int(self.start_episode_entry.get())
         except ValueError:
-            self.status_label.config(text="Error: Invalid season number")
+            self.status_label.config(text="Error: Invalid season or starting episode number")
             return
         
-        self.rename_mapping = self.generate_rename_mapping(new_season)
+        self.rename_mapping = self.generate_rename_mapping(new_season, start_episode)
         if not self.rename_mapping:
             self.status_label.config(text="No matching files found")
             return
@@ -108,7 +112,7 @@ class FileRenamerApp:
         
         self.status_label.config(text="Preview completed")
     
-    def generate_rename_mapping(self, new_season):
+    def generate_rename_mapping(self, new_season, start_episode):
         """Generate a mapping of old filenames to new filenames."""
         pattern = re.compile(r"(.*?)(s)(\d{2})(e)(\d{2})(.*)", re.IGNORECASE)
         rename_mapping = {}
@@ -120,7 +124,7 @@ class FileRenamerApp:
         ]
         files.sort(key=lambda x: int(x[1].group(5)))
         
-        for i, (filename, match) in enumerate(files, start=1):
+        for i, (filename, match) in enumerate(files, start=start_episode):
             new_episode = i
             prefix = match.group(1)
             suffix = match.group(6)
